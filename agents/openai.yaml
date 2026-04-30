@@ -1,0 +1,4 @@
+interface:
+  display_name: "B2B Vendor Customer Mapping"
+  short_description: "Map public B2B vendor customer evidence from websites."
+  default_prompt: "Map public customer evidence for these B2B vendors and produce verified vendor-customer pairs with proof links."
