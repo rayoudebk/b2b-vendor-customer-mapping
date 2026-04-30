@@ -5,7 +5,7 @@ from collections import Counter
 
 from playwright.async_api import async_playwright
 
-from common import append_csv, name_supported, read_csv
+from common import append_csv, name_supported, read_csv, surface_score
 
 
 FIELDS = [
@@ -21,11 +21,33 @@ FIELDS = [
     "match_reason",
     "page_title",
     "visible_chars",
+    "metadata_chars",
     "error",
 ]
 
 
-def out_row(row, status, reason="", title="", body="", error=""):
+async def extract_logo_metadata(page):
+    return await page.evaluate(
+        """() => {
+            const values = [];
+            const add = value => {
+                if (value && typeof value === 'string') values.push(value);
+            };
+            document.querySelectorAll('img, source, [role="img"]').forEach(el => {
+                add(el.getAttribute('alt'));
+                add(el.getAttribute('title'));
+                add(el.getAttribute('aria-label'));
+                add(el.getAttribute('src'));
+                add(el.getAttribute('srcset'));
+                add(el.getAttribute('data-src'));
+                add(el.getAttribute('data-srcset'));
+            });
+            return values.join(' ');
+        }"""
+    )
+
+
+def out_row(row, status, reason="", title="", body="", metadata="", error=""):
     return {
         "vendor_slug": row.get("vendor_slug", ""),
         "vendor_name": row.get("vendor_name", ""),
@@ -39,6 +61,7 @@ def out_row(row, status, reason="", title="", body="", error=""):
         "match_reason": reason,
         "page_title": title,
         "visible_chars": str(len(body or "")),
+        "metadata_chars": str(len(metadata or "")),
         "error": error[:500],
     }
 
@@ -51,8 +74,15 @@ async def check_one(context, row):
         await page.wait_for_timeout(700)
         title = await page.title()
         body = await page.locator("body").inner_text(timeout=5000)
+        metadata = await extract_logo_metadata(page)
         ok, reason = name_supported(row.get("customer_name", ""), [body, title, url])
-        return out_row(row, "verified_named_customer" if ok else "review_named_customer", reason, title, body)
+        if not ok and metadata:
+            score, surface_type, matched_terms = surface_score(url, f"{title} {body[:2000]}")
+            meta_ok, meta_reason = name_supported(row.get("customer_name", ""), [metadata, title, url])
+            if meta_ok and score > 0:
+                ok = True
+                reason = f"customer_surface_{surface_type}_logo_metadata:{meta_reason}:{'|'.join(matched_terms)}"
+        return out_row(row, "verified_named_customer" if ok else "review_named_customer", reason, title, body, metadata)
     except Exception as e:
         return out_row(row, "blocked_or_unreachable", "browser_error", error=str(e))
     finally:

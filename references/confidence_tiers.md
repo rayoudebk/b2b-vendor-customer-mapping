@@ -8,6 +8,7 @@ Use confidence tiers to keep confirmed evidence separate from review candidates.
 
 - Official vendor-controlled evidence page loaded.
 - Customer name is visible or strongly token-matched in rendered text, title, URL, or metadata.
+- On customer-surface pages, rendered logo/carousel metadata can support the name when the match comes from `alt`, `title`, `aria-label`, `src`, `srcset`, or lazy-load attributes.
 - Typical sources: case study, customer story, press release, client page, testimonial.
 
 `verified_customer_logo`
@@ -16,6 +17,7 @@ Use confidence tiers to keep confirmed evidence separate from review candidates.
 - Logo asset loads.
 - Logo asset is present or referenced on the evidence page.
 - Customer name is supported by alt text, title, filename, visible text, URL slug, or page context.
+- Broad logo-alt discoveries remain review candidates until page-level validation confirms customer evidence context.
 
 ## Review
 

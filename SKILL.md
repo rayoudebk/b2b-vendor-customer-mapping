@@ -51,7 +51,10 @@ Run the stages in order. Keep every intermediate file; do not overwrite final ou
 
 6. Browser QA
    - Named evidence is verified when the evidence page loads and the customer name is visible or strongly token-matched.
+   - For customer-surface pages, named QA must also inspect rendered image/source metadata (`alt`, `title`, `aria-label`, `src`, `srcset`, lazy-load attributes). Logo carousels often expose short customer names only there.
+   - Do not reject a short brand token solely because it is `single_token` when it appears in customer-carousel metadata on an official customer surface.
    - Logo evidence is verified when the logo asset loads, appears or is referenced on the evidence page, and asset metadata or page context supports the customer name.
+   - Broad all-vendor logo-alt discovery is a review/rescue queue, not an auto-promotion path. Promote only after page-level validation confirms customer-surface context and filters artifacts.
    - Never merge unverified rows into the confirmed map. Put them in review queues.
 
 7. Consolidate
@@ -96,6 +99,7 @@ Use these final statuses:
 - Do not call review-only candidates confirmed.
 - Do not call a vendor a true zero until sitemap coverage, blocked pages, JS-rendered pages, and dropped canonical variants are accounted for.
 - Do not treat logo-only rows as confirmed without logo-specific browser QA.
+- Do not treat a broad logo-alt row as confirmed without page-level customer evidence validation.
 - If the crawl fails on many domains, inspect failure buckets before retrying with a new IP or VPN.
 
 See `references/output_schemas.md`, `references/confidence_tiers.md`, and `references/failure_modes.md` for details.

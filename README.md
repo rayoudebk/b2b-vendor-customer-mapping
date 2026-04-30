@@ -36,8 +36,10 @@ python3 -m playwright install chromium
 3. Optionally screen URLs with Ollama.
 4. Extract named customers from pages, titles, headings, metadata, and slugs.
 5. Extract logo candidates from customer/client pages.
-6. Browser-verify named evidence and logo evidence.
+6. Browser-verify named evidence and logo evidence. Named QA also checks rendered logo/carousel metadata on customer-surface pages, because some sites expose customer names only in `alt`, `title`, `src`, or `srcset` attributes.
 7. Consolidate verified pairs and review queues.
+
+Broad logo-alt discovery is useful for rescue work, but should stay in a review queue until page-level validation confirms a customer evidence surface and filters UI icons, awards, partner marks, blog graphics, and vendor self-logos.
 
 ## Output
 
@@ -62,6 +64,15 @@ customer_name,vendor_count,vendors,vendor_slugs,evidence_urls,evidence_types
 - `blocked_or_unreachable`
 - `rejected_artifact`
 - `no_public_customer_evidence_found`
+
+## Rescue Passes
+
+When a verified map looks complete but a known customer page was missed, rerun the audit in this order:
+
+1. Re-audit existing `review_*` rows with browser-rendered text plus image metadata.
+2. Revisit sitemap/customer-surface discovery for generic paths such as `/resources/`, `/news/`, `/success-story`, `/references`, and localized variants.
+3. Run broad logo-alt discovery only as a review queue.
+4. Promote only rows that pass page-level validation on a vendor-controlled customer evidence page.
 
 ## License
 
